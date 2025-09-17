@@ -6,4 +6,83 @@ editor_options:
   chunk_output_type: inline
 ---
 
-Answers go here!
+For this task we use the `readxl` package and `tidyverse`, so we start by loading the packages.
+
+```{r}
+library(tidyverse)
+library(readxl)
+```
+
+First we import the data from the first sheet of the white-wine Excel file, store it in an object called `white_wine_data`, and print out the tibble.
+
+```{r}
+white_wine_data <- read_excel('../white-wine.xlsx', sheet = excel_sheets('../white-wine.xlsx')[1])
+white_wine_data
+```
+
+Next we read in the second sheet from the white-wine Excel file. Then we grab that column and overwrite the current column names of the `white_wine_data` tibble.
+
+```{r}
+var_names <- read_excel('../white-wine.xlsx', sheet = excel_sheets('../white-wine.xlsx')[2])
+colnames(white_wine_data) <- var_names$Variables
+white_wine_data
+```
+
+Finally we add a column to the tibble to indicate the wines are white.
+
+```{r}
+white_wine_data$type <- 'white'
+```
+
+Next we read in the red wine data set. We note that all columns have been correctly read in as doubles. We replace the non-standard variable names as we did above. Finally we append a column denoting the wine `type` as 'red.'
+
+```{r}
+red_wine_data <- read_delim('https://www4.stat.ncsu.edu/~online/datasets/red-wine.csv', delim  = ';')
+colnames(red_wine_data) <- var_names$Variables
+red_wine_data$type <- 'red'
+red_wine_data
+```
+
+Next we combine the white wine and red wine data sets into one tibble and save it in an object called `wine`.
+
+```{r}
+wine <- bind_rows(white_wine_data, red_wine_data)
+wine
+```
+
+Next we start a chain on your new combined data object `wine` to filter the data to only look at high-quality wines (quality > 6.5) and wines that have a reasonable alcohol value (alcohol < 132).
+
+```{r}
+wine |>
+  filter(quality > 6.5, alcohol < 132)
+```
+
+Next we continue the chain to now sort the data from highest quality to lowest.
+
+```{r}
+wine |>
+  filter(quality > 6.5, alcohol < 132) |>
+  arrange(desc(quality))
+```
+
+Next we continue the chain to select only the variables that contain 'acid', the alcohol variable, the type variable, and the quality variable.
+
+```{r}
+wine |>
+  filter(quality > 6.5, alcohol < 132) |>
+  arrange(desc(quality)) |>
+  select(contains('acid'), alcohol, type, quality)
+```
+
+Finally we continue the chain to add the mean and standard deviation of the alcohol variable to the data set for each setting of the quality variable.
+
+```{r}
+wine |>
+  filter(quality > 6.5, alcohol < 132) |>
+  arrange(desc(quality)) |>
+  select(contains('acid'), alcohol, type, quality) |>
+  group_by(quality) |>
+  mutate(alcohol_mean = mean(alcohol), alcohol_sd = sd(alcohol))
+      
+```
+

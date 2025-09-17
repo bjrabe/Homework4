@@ -6,5 +6,78 @@ editor_options:
   chunk_output_type: inline
 ---
 
+First we load `tidyverse` for use on this task.
 
-Answers go here!
+```{r}
+library(tidyverse)
+```
+
+We read in the glass data using the URL and store it in an object called `glass_data`. We give the columns representative names and print the tibble. 
+
+```{r}
+glass_data <- read_csv('https://www4.stat.ncsu.edu/~online/datasets/glass.data', col_names = c('Id', 'RI', 'Na', 'Mg', 'Al', 'Si', 'K', 'Ca', 'Ba', 'Fe', 'Type_of_Glass'))
+glass_data
+```
+
+Next we start a chain that overwrites the `Type_of_Glass` variable using `mutate()` to replace the given numbers with descriptive strings.
+
+```{r}
+glass_data |>
+  mutate(Type_of_Glass = ifelse(Type_of_Glass == 1,
+                                'building_windows_float_processed',
+                                ifelse(Type_of_Glass == 2,
+                                       'building_windows_non_float_processed',
+                                       ifelse(Type_of_Glass == 3,
+                                              'vehicle_windows_float_processed',
+                                              ifelse(Type_of_Glass == 4,
+                                                     'vehicle_windows_non_float_processed',
+                                                     ifelse(Type_of_Glass == 5, 
+                                                            'containers',
+                                                            ifelse(Type_of_Glass == 6,
+                                                                   'tableware',
+                                                                   'headlamps')))))))
+```
+
+Then we continue the chain to keep only observations where the `Fe` variable is less than 0.2 and the `Type_of_Glass` variable is either “tableware” or “headlamps.”
+
+```{r}
+glass_data |>
+  mutate(Type_of_Glass = ifelse(Type_of_Glass == 1,
+                                'building_windows_float_processed',
+                                ifelse(Type_of_Glass == 2,
+                                       'building_windows_non_float_processed',
+                                       ifelse(Type_of_Glass == 3,
+                                              'vehicle_windows_float_processed',
+                                              ifelse(Type_of_Glass == 4,
+                                                     'vehicle_windows_non_float_processed',
+                                                     ifelse(Type_of_Glass == 5, 
+                                                            'containers',
+                                                            ifelse(Type_of_Glass == 6,
+                                                                   'tableware',
+                                                                   'headlamps'))))))) |>
+  filter(Fe < 0.2, Type_of_Glass %in% c('tableware', 'headlamps')) 
+```
+
+Now we work on the Yeast data. We read in the data directly from the URL and assign column names. Then we print the tibble. 
+
+```{r}
+yeast_data <- read_table('https://www4.stat.ncsu.edu/~online/datasets/yeast.data', col_names = c('seq_name', 'mcg', 'gvh', 'alm', 'mit', 'erl', 'pox', 'vac', 'nuc', 'class'))
+yeast_data
+```
+
+Next we start a chain which removes `seq_name` and `nuc` columns.
+
+```{r}
+yeast_data |>
+  select(-c(seq_name, nuc))
+```
+
+Then we continue the chain to add columns corresponding to the mean and median of each numeric variable at each class grouping.
+
+```{r}
+yeast_data |>
+  select(-c(seq_name, nuc)) |>
+  group_by(class) |>
+  mutate(across(where(is.numeric), list(mean = mean, median = median), .names = '{.col}_{.fn}')) 
+```
+

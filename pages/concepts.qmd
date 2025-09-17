@@ -3,8 +3,43 @@ title: "Conceptual Questions"
 format: html
 toc: TRUE
 editor_options: 
-  chunk_output_type: inline
+  chunk_output_type: console
 ---
 
+We start by loading `tidyverse` since we will use it in question 5.
 
-Answers go here!
+```{r}
+library(tidyverse)
+```
+
+1.  If your working directory is myfolder/homework/, what relative path would you specify to get the file located at myfolder/MyData.csv?
+
+> Our data is in a folder one folder up from our working directory. So the relative path would be ../MyData.csv. So we would use the call `read_csv('../MyData.csv')` to read in this csv file.
+
+2.  What are the major benefits of using R projects?
+
+> When working on a project, we often have many different files which are relevant to the project. This includes source files with raw data, scripts written to modify and analyze data, and files which contain outputs of analyses, including Quarto documents, graphs, and tables, among others. R projects allow us to arrange all our relevant files into an organized repository which permits us to access all relevent documents through the use of relative paths.
+
+3.  What is git and what is github?
+
+> Git is a freely available version control software, and GitHub is an online hosting service for Git projects. GitHub allows the sharing and modification of projects so that multiple users can work on projects at the same time and merge the changes.
+
+4.  What are the two main differences between a tibble and a data.frame?
+
+> One difference is that when tibbles are printed, the data type for each column in the tibble is displayed at the top of the column (there are some other minor differences with printing but this feature is the most noteworthy difference). A second difference is that when you subset a tibble down to only one column, it still returns a tibble. It does not coerce down to a vector as it does for a data frame.
+
+5.  Rewrite the following nested function call using BaseR’s chaining operator:
+
+```{r}
+arrange(filter(select(as_tibble(iris), starts_with("Petal"), Species), Petal.Length < 1.55), Species)
+```
+
+> We re-write this as follows:
+
+```{r}
+iris |>
+as_tibble() |>  
+select(starts_with('Petal'), Species) |>  
+filter(Petal.Length < 1.55) |> 
+arrange(Species)
+```
